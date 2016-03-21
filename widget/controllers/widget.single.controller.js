@@ -27,20 +27,36 @@
 
         var init = function () {
           var success = function (result) {
-              WidgetSingle.data = result.data;
-              if (!WidgetSingle.data.design)
-                WidgetSingle.data.design = {};
-              if (!WidgetSingle.data.content)
-                WidgetSingle.data.content = {};
-              if (!WidgetSingle.data.design.itemListLayout) {
-                WidgetSingle.data.design.itemListLayout = LAYOUTS.listLayouts[0].name;
-              }
+              if (result.data && result.id) {
+                WidgetSingle.data = result.data;
+                if (!WidgetSingle.data.design)
+                  WidgetSingle.data.design = {};
+                if (!WidgetSingle.data.content)
+                  WidgetSingle.data.content = {};
+                if (!WidgetSingle.data.design.itemListLayout) {
+                  WidgetSingle.data.design.itemListLayout = LAYOUTS.listLayouts[0].name;
+                }
                 if (WidgetSingle.data.design.itemDetailsBgImage) {
                   $rootScope.backgroundImage = WidgetSingle.data.design.itemDetailsBgImage;
                 }
 
-              currentItemListLayout = WidgetSingle.data.design.itemListLayout;
-              currentPlayListID = WidgetSingle.data.content.playListID;
+                currentItemListLayout = WidgetSingle.data.design.itemListLayout;
+                currentPlayListID = WidgetSingle.data.content.playListID;
+              }
+              else {
+                WidgetSingle.data = {
+                  content: {},
+                  design: {}
+                };
+                var dummyData = {
+                  url: "http://www.youtube.com/user/goprocamera",
+                  type: "Channel Feed",
+                  playListID: "UUqhnX4jA0A5paNd1v-zEysw"
+                };
+                WidgetSingle.data.design.itemListLayout = "List_Layout_1";
+                WidgetSingle.data.content.rssUrl = dummyData.url;
+              }
+
             }
             , error = function (err) {
               console.error('Error while getting data', err);
@@ -81,8 +97,8 @@
               WidgetSingle.data.content = {};
             if (WidgetSingle.data.design.itemDetailsBgImage) {
               $rootScope.backgroundImage = WidgetSingle.data.design.itemDetailsBgImage;
-            }else{
-              $rootScope.backgroundImage="";
+            } else {
+              $rootScope.backgroundImage = "";
             }
             if (WidgetSingle.data.content.type)
               $rootScope.contentType = WidgetSingle.data.content.type;

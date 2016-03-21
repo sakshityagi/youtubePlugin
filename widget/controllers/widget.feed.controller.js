@@ -16,8 +16,8 @@
         var currentListLayout = null;
         var currentPlayListId = null;
         WidgetFeed.masterData = {
-            playListId : ""
-        }
+          playListId: ""
+        };
 
         /*declare the device width heights*/
         $rootScope.deviceHeight = window.innerHeight;
@@ -28,28 +28,46 @@
          */
         var init = function () {
           var success = function (result) {
-              WidgetFeed.data = result.data;
-              if (!WidgetFeed.data.design)
-                WidgetFeed.data.design = {};
-              if (!WidgetFeed.data.content)
-                WidgetFeed.data.content = {};
-              if (!WidgetFeed.data.design.itemListLayout) {
-                WidgetFeed.data.design.itemListLayout = LAYOUTS.listLayouts[0].name;
-              }
+              if (result.data && result.id) {
+                WidgetFeed.data = result.data;
+                if (!WidgetFeed.data.design)
+                  WidgetFeed.data.design = {};
+                if (!WidgetFeed.data.content)
+                  WidgetFeed.data.content = {};
+                if (!WidgetFeed.data.design.itemListLayout) {
+                  WidgetFeed.data.design.itemListLayout = LAYOUTS.listLayouts[0].name;
+                }
                 if (WidgetFeed.data.design.itemListBgImage) {
                   $rootScope.backgroundListImage = WidgetFeed.data.design.itemListBgImage;
                 }
 
                 if (WidgetFeed.data.content.type)
-                $rootScope.contentType = WidgetFeed.data.content.type;
-              currentListLayout = WidgetFeed.data.design.itemListLayout;
-              if (WidgetFeed.data.content && WidgetFeed.data.content.playListID) {
-                currentPlayListId = WidgetFeed.data.content.playListID;
+                  $rootScope.contentType = WidgetFeed.data.content.type;
+                currentListLayout = WidgetFeed.data.design.itemListLayout;
+                if (WidgetFeed.data.content && WidgetFeed.data.content.playListID) {
+                  currentPlayListId = WidgetFeed.data.content.playListID;
                   WidgetFeed.masterData.playListId = currentPlayListId;
-              }
-              if (WidgetFeed.data.content && WidgetFeed.data.content.videoID) {
-                console.log('single video detected');
-                Location.goTo("#/video/" + WidgetFeed.data.content.videoID);
+                }
+                if (WidgetFeed.data.content && WidgetFeed.data.content.videoID) {
+                  console.log('single video detected');
+                  Location.goTo("#/video/" + WidgetFeed.data.content.videoID);
+                }
+              } else {
+                WidgetFeed.data = {
+                  content: {},
+                  design: {}
+                };
+                var dummyData = {
+                  url: "http://www.youtube.com/user/goprocamera",
+                  type: "Channel Feed",
+                  playListID: "UUqhnX4jA0A5paNd1v-zEysw"
+                };
+                WidgetFeed.data.content.url = dummyData.url;
+                WidgetFeed.data.content.playListID = dummyData.playListID;
+                WidgetFeed.data.content.type = dummyData.type;
+                WidgetFeed.data.design.itemListLayout = "List_Layout_1";
+                currentPlayListId = WidgetFeed.data.content.playListID;
+                WidgetFeed.masterData.playListId = currentPlayListId;
               }
             }
             , error = function (err) {
@@ -104,8 +122,8 @@
             if (WidgetFeed.data.design.itemListBgImage) {
               $rootScope.backgroundListImage = WidgetFeed.data.design.itemListBgImage;
             }
-            else{
-              $rootScope.backgroundListImage="";
+            else {
+              $rootScope.backgroundListImage = "";
             }
 
             if (currentListLayout != WidgetFeed.data.design.itemListLayout && view && WidgetFeed.data.content.carouselImages) {
@@ -129,7 +147,6 @@
               currentPlayListId = WidgetFeed.data.content.playListID;
               getFeedVideos(WidgetFeed.data.content.playListID);
             }
-            console.log("+++++++++++++vl5", WidgetFeed.data.content.playListID, WidgetFeed.masterData.playListId)
             if (WidgetFeed.data.content && WidgetFeed.data.content.playListID && (WidgetFeed.data.content.playListID !== WidgetFeed.masterData.playListId)) {
               currentPlayListId = WidgetFeed.data.content.playListID;
               WidgetFeed.masterData.playListId = currentPlayListId;
@@ -157,14 +174,14 @@
 
         WidgetFeed.safeHtml = function (html) {
           if (html) {
-              var $html = $('<div />', {html: html});
-              $html.find('iframe').each(function (index, element) {
-                  var src = element.src;
-                  console.log('element is: ', src, src.indexOf('http'));
-                  src = src && src.indexOf('file://') != -1 ? src.replace('file://', 'http://') : src;
-                  element.src = src && src.indexOf('http') != -1 ? src : 'http:' + src;
-              });
-              return $sce.trustAsHtml($html.html());
+            var $html = $('<div />', {html: html});
+            $html.find('iframe').each(function (index, element) {
+              var src = element.src;
+              console.log('element is: ', src, src.indexOf('http'));
+              src = src && src.indexOf('file://') != -1 ? src.replace('file://', 'http://') : src;
+              element.src = src && src.indexOf('http') != -1 ? src : 'http:' + src;
+            });
+            return $sce.trustAsHtml($html.html());
           }
         };
 
@@ -191,22 +208,22 @@
             WidgetFeed.data.design = {};
           if (!WidgetFeed.data.content)
             WidgetFeed.data.content = {};
-          if(WidgetFeed.masterData.playListId !=WidgetFeed.data.content.playListID){
-                WidgetFeed.busy = false;
-                WidgetFeed.nextPageToken = null;
-                WidgetFeed.videos = [];
-                WidgetFeed.masterData.playListId = WidgetFeed.data.content.playListID;
-                getFeedVideos(WidgetFeed.data.content.playListID);
-             }
+          if (WidgetFeed.masterData.playListId != WidgetFeed.data.content.playListID) {
+            WidgetFeed.busy = false;
+            WidgetFeed.nextPageToken = null;
+            WidgetFeed.videos = [];
+            WidgetFeed.masterData.playListId = WidgetFeed.data.content.playListID;
+            getFeedVideos(WidgetFeed.data.content.playListID);
+          }
           if (WidgetFeed.data.design.itemListBgImage) {
             $rootScope.backgroundListImage = WidgetFeed.data.design.itemListBgImage;
           }
-          else{
-            $rootScope.backgroundListImage="";
+          else {
+            $rootScope.backgroundListImage = "";
           }
           if (!(WidgetFeed.videos.length >= 0) && WidgetFeed.data.content.playlistId) {
             currentPlayListId = WidgetFeed.data.content.playListID;
-              WidgetFeed.masterData.playListId = currentPlayListId;
+            WidgetFeed.masterData.playListId = currentPlayListId;
             getFeedVideos(WidgetFeed.data.content.playListID);
           }
           if (!view) {

@@ -85,12 +85,8 @@
         var init = function () {
           var success = function (result) {
               console.info('init success result:', result);
-              if (Object.keys(result.data).length > 0) {
+              if (result.data && result.id) {
                 ContentHome.data = result.data;
-              }
-              if (!ContentHome.data) {
-                ContentHome.data = angular.copy(_data);
-              } else {
                 if (!ContentHome.data.content)
                   ContentHome.data.content = {};
                 if (ContentHome.data.content.type)
@@ -101,17 +97,22 @@
                   editor.loadItems([]);
                 else
                   editor.loadItems(ContentHome.data.content.carouselImages);
+                updateMasterItem(ContentHome.data);
+                if (tmrDelay)clearTimeout(tmrDelay);
               }
-              updateMasterItem(ContentHome.data);
-              if (tmrDelay)clearTimeout(tmrDelay);
+              else {
+                var dummyData = {
+                  url: "http://www.youtube.com/user/goprocamera",
+                  type: "Channel Feed"
+                };
+                ContentHome.rssLink = dummyData.url;
+                ContentHome.contentType = dummyData.type;
+              }
             }
             , error = function (err) {
               if (err && err.code !== STATUS_CODE.NOT_FOUND) {
                 console.error('Error while getting data', err);
                 if (tmrDelay)clearTimeout(tmrDelay);
-              }
-              else if (err && err.code === STATUS_CODE.NOT_FOUND) {
-                saveData(JSON.parse(angular.toJson(ContentHome.data)), TAG_NAMES.YOUTUBE_INFO);
               }
             };
           DataStore.get(TAG_NAMES.YOUTUBE_INFO).then(success, error);
@@ -177,6 +178,10 @@
                         ContentHome.validLinkSuccess = false;
                       }, 5000);
                       ContentHome.validLinkFailure = false;
+                      if (!ContentHome.data)
+                        ContentHome.data = {
+                          content: {}
+                        };
                       ContentHome.data.content.rssUrl = ContentHome.rssLink;
                       ContentHome.data.content.type = ContentHome.contentType;
                       ContentHome.data.content.videoID = videoID;
@@ -230,6 +235,10 @@
                         ContentHome.validLinkSuccess = false;
                       }, 5000);
                       ContentHome.validLinkFailure = false;
+                      if (!ContentHome.data)
+                        ContentHome.data = {
+                          content: {}
+                        };
                       ContentHome.data.content.rssUrl = ContentHome.rssLink;
                       ContentHome.data.content.type = ContentHome.contentType;
                       if (response.items[0].contentDetails && response.items[0].contentDetails.relatedPlaylists && response.items[0].contentDetails.relatedPlaylists.uploads)
