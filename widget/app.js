@@ -115,17 +115,13 @@
       };
     }])
     .run(['Location', '$location', '$rootScope', function (Location, $location, $rootScope) {
-      buildfire.navigation.onBackButtonClick = function () {
-        var reg = /^\/video/;
-        if (reg.test($location.path()) && $rootScope.contentType == "Channel Feed") {
-          $rootScope.showFeed = true;
-          Location.goTo('#/');
-        }
-        else {
-          buildfire.navigation._goBackOne();
-        }
-      };
-
+          buildfire.history.onPop(function(err,data){
+              var reg = /^\/video/;
+              if (reg.test($location.path()) && $rootScope.contentType == "Channel Feed") {
+                  $rootScope.showFeed = true;
+                  Location.goTo('#/');
+              }
+          });
     }]).filter('cropImage', [function () {
       return function (url, width, height, type) {
         return buildfire.imageLib.cropImage(url, {
