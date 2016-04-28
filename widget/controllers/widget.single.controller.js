@@ -20,7 +20,7 @@
           if (link)
             buildfire.navigation.openWindow(link);
         };
-        buildfire.history.push('Event', { elementToShow: 'Event' });
+        buildfire.history.push('Video', { elementToShow: 'Video' });
 
         /*
          * Fetch user's data from datastore
