@@ -14,6 +14,8 @@
           currentPlayListID = null,
           currentItemListLayout = null;
         var WidgetSingle = this;
+        var audioPlayer;
+        var player;
         WidgetSingle.data = null;
         WidgetSingle.video = null;
         WidgetSingle.viewSource = function (link) {
@@ -41,6 +43,51 @@
 
               currentItemListLayout = WidgetSingle.data.design.itemListLayout;
               currentPlayListID = WidgetSingle.data.content.playListID;
+
+                  function onYouTubeIframeAPIReady() {
+                      player = new YT.Player('ytPlayer', {
+                          videoId: WidgetSingle.video.id,
+                          width: "100%",
+                          height: window.innerHeight/2.83+"px",
+                          frameborder: "0",
+                          playerVars: {
+                              autoplay: 0
+                          },
+                          events: {
+                              'onReady': onPlayerReady
+                          }
+                      });
+                  }
+                  // autoplay video
+                  function onPlayerReady(event) {
+                      audioPlayer = window.buildfire.services.media.audioPlayer;
+                      player.addEventListener('onStateChange', function(e) {
+                          console.log('State is:', e.data);
+                          if(e.data == 1)
+                          {
+                              console.log('video played');
+                              audioPlayer.pause();
+                          } else if (e.data == 2) {
+                              console.log('video paused');
+                              if(audioPlayer && audioPlayer.settings) {
+                                  audioPlayer.settings.get(function (err, data) {
+                                      if(data && data.isPlayingCurrentTrack)
+                                          audioPlayer.play();
+                                  });
+                              }
+                          } else if (e.data == 0) {
+                              console.log('video ended');
+                              if(audioPlayer && audioPlayer.settings) {
+                                  audioPlayer.settings.get(function (err, data) {
+                                      if(data && data.isPlayingCurrentTrack)
+                                          audioPlayer.play();
+                                  });
+                              }
+                          }
+                      });
+//                      event.target.playVideo();
+                  }
+                  onYouTubeIframeAPIReady();
             }
             , error = function (err) {
               console.error('Error while getting data', err);
@@ -112,6 +159,12 @@
 
         $scope.$on("$destroy", function () {
           console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", WidgetSingle.data);
+            if(audioPlayer && audioPlayer.settings) {
+                audioPlayer.settings.get(function (err, data) {
+                    if(data && data.isPlayingCurrentTrack)
+                        audioPlayer.play();
+                });
+            }
           DataStore.clearListener();
           $rootScope.$broadcast('ROUTE_CHANGED', WidgetSingle.data);
         });
